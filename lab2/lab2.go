@@ -29,13 +29,15 @@ func FindRoot(approx float64) (float64, int) {
 	currentRoot = approx - accuracy
 
 	// Поиск Xk+1
-	nextRoot = currentRoot - ExecFunc(currentRoot)*(currentRoot-prevRoot)/(ExecFunc(currentRoot+(currentRoot-prevRoot))-ExecFunc(prevRoot))
+	nextRoot = currentRoot - ExecFunc(currentRoot)*(currentRoot-prevRoot)/
+		(ExecFunc(currentRoot+(currentRoot-prevRoot))-ExecFunc(prevRoot))
 	counter := 1
 	// Циклический поиск корня по заданной точности
 	for math.Abs(nextRoot-currentRoot) > accuracy {
 		prevRoot = currentRoot
 		currentRoot = nextRoot
-		nextRoot = currentRoot - ExecFunc(currentRoot)*(currentRoot-prevRoot)/(ExecFunc(currentRoot+(currentRoot-prevRoot))-ExecFunc(prevRoot))
+		nextRoot = currentRoot - ExecFunc(currentRoot)*(currentRoot-prevRoot)/
+			(ExecFunc(currentRoot+(currentRoot-prevRoot))-ExecFunc(prevRoot))
 		counter = counter + 1
 	}
 	return nextRoot, counter
@@ -44,8 +46,14 @@ func FindRoot(approx float64) (float64, int) {
 func main() {
 	// Поиск первого корня
 	firstRoot, firstCounter := FindRoot(initialApproxOfFirst)
-	fmt.Printf("Первый корень: %v, число иттераций: %v\n", firstRoot, firstCounter)
+	fmt.Printf("Первый корень: %v, число иттераций: %v, точность: %v\n",
+		firstRoot,
+		firstCounter,
+		accuracy)
 	// Поиск второго корня
 	secondRoot, secondCounter := FindRoot(initialApproxOfSecond)
-	fmt.Printf("Ворой корень: %v, число иттераций: %v\n", secondRoot, secondCounter)
+	fmt.Printf("Ворой корень: %v, число иттераций: %v, точность: %v\n",
+		secondRoot,
+		secondCounter,
+		accuracy)
 }
