@@ -10,9 +10,9 @@ import (
 
 // Начальные условия
 const (
-	initialApproxOfFirst  = -1
+	initialApproxOfFirst  = 0
 	initialApproxOfSecond = 1
-	accuracy              = 0.001
+	accuracy              = 0.0001
 )
 
 // Функция

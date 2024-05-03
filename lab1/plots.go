@@ -23,31 +23,33 @@ func NewPoint(x int, y int) *Point {
 }
 
 type Plotter struct {
-	backgroundColor        color.Color
-	axisColor              color.Color
-	graphsColor            color.Color
-	additionalColor        color.Color
-	anotherAdditionalColor color.Color
-	inputFile              *os.File
-	outputFile             *os.File
-	outputFilename         string
-	inputFilename          string
-	size                   int
-	scaleX                 int
-	scaleY                 int
-	notchSize              int
-	points                 []*Point
-	chart                  *image.RGBA
-	middle                 *Point
+	backgroundColor         color.Color
+	axisColor               color.Color
+	graphsColor             color.Color
+	additionalColor         color.Color
+	anotherAdditionalColor  color.Color
+	inputFile               *os.File
+	outputFile              *os.File
+	outputFilename          string
+	inputFilename           string
+	size                    int
+	scaleX                  int
+	scaleY                  int
+	notchSize               int
+	points                  []*Point
+	AdditionalPoints        []*Point
+	anotherAdditionalPoints []*Point
+	chart                   *image.RGBA
+	middle                  *Point
 }
 
 func NewPlotter() *Plotter {
 	return &Plotter{
 		backgroundColor:        color.White,
 		axisColor:              color.Black,
-		graphsColor:            color.RGBA{255, 0, 0, 255},
-		additionalColor:        color.RGBA{0, 0, 255, 255},
-		anotherAdditionalColor: color.RGBA{0, 0, 255, 255},
+		graphsColor:            color.RGBA{R: 255, A: 255},
+		additionalColor:        color.RGBA{B: 255, A: 255},
+		anotherAdditionalColor: color.RGBA{B: 255, A: 255},
 		outputFilename:         "output.png",
 		inputFilename:          "input.txt",
 		size:                   500,
@@ -100,12 +102,22 @@ func (p *Plotter) CollectPoints(data []float64) {
 	p.points = append(p.points, &Point{x: int(data[0] * float64(p.size/p.scaleX)), y: int(data[1] * float64(p.size/p.scaleY))})
 }
 
+func (p *Plotter) CollectAdditionalPoints(data []float64) {
+	p.AdditionalPoints = append(p.AdditionalPoints, &Point{x: int(data[0] * float64(p.size/p.scaleX)), y: int(data[1] * float64(p.size/p.scaleY))})
+}
+
+func (p *Plotter) CollectAnotherAdditionalPoints(data []float64) {
+	p.points = append(p.anotherAdditionalPoints, &Point{x: int(data[0] * float64(p.size/p.scaleX)), y: int(data[1] * float64(p.size/p.scaleY))})
+}
+
 func (p *Plotter) AcceptPoints(points []*Point) {
 	p.points = points
 }
 
 func (p *Plotter) ClearPoints() {
 	p.points = []*Point{}
+	p.AdditionalPoints = []*Point{}
+	p.anotherAdditionalPoints = []*Point{}
 }
 
 func (p *Plotter) createChart() {
@@ -146,15 +158,30 @@ func (p *Plotter) DrawByPoints() {
 			p.middle.y-p.points[i].y,
 			p.graphsColor)
 	}
+	for i := 1; i < len(p.AdditionalPoints); i++ {
+		bresenham.DrawLine(p.chart,
+			p.middle.x+p.AdditionalPoints[i-1].x,
+			p.middle.y-p.AdditionalPoints[i-1].y,
+			p.middle.x+p.AdditionalPoints[i].x,
+			p.middle.y-p.AdditionalPoints[i].y,
+			p.additionalColor)
+	}
+
 }
 
 func (p *Plotter) ExportToPng() {
 	var err error
-	p.outputFile, err = os.Create(p.outputFilename)
+	file, err := os.Create(p.outputFilename)
 	if err != nil {
+		defer fmt.Println("ne sozdal")
 		panic(err)
 	}
-	png.Encode(p.outputFile, p.chart)
+	err = png.Encode(file, p.chart)
+	if err != nil {
+		defer fmt.Println("tut zalupa")
+		panic(err)
+	}
+
 }
 
 func (p *Plotter) ImportFromTxt() {
